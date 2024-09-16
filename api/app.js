@@ -16,7 +16,7 @@ const data = require('./data/data.json');
   * une chaîne de caractères.
   */
 function demarrage(){
-    return "";
+    return "Bonjour";
 }
 
  /**
@@ -26,7 +26,7 @@ function demarrage(){
   * Elle retourne un objet javascript au format json.
   */
 function home(){
-    return undefined;
+    return data;
 }
 
  /**
@@ -36,7 +36,7 @@ function home(){
   * Elle retourne un objet javascript contenant toutes les données.
   */
 function donnees(){
-    return {};
+    return data;
 }
 
  /**
@@ -48,7 +48,7 @@ function donnees(){
   * Cette liste sera contenu dans la clé communication
   */
 function comms(){
-    return {"communication":[]};
+    return {"communication":data.communication};
 }
 
 
@@ -61,7 +61,7 @@ function comms(){
   * Cette liste sera contenue dans la clé objects
   */
 function objects(){
-    return {"objects":[]};
+    return {"objects":data.objects};
 }
 
  /**
@@ -73,7 +73,14 @@ function objects(){
   * Cette liste sera contenu dans la clé types
   */
 function types(){
-    return undefined;
+     return {
+         "types": Object.keys(data.types).map(key => ({
+             name: key,
+             description: data.types[key].description,
+             sensors: data.types[key].sensors,
+             communication: data.types[key].communication
+         }))
+     };
 }
 
 /**
@@ -85,7 +92,11 @@ function types(){
  * Cette liste sera contenu dans la clé formats.
  */
 function formats(){
-   return undefined;
+   return {"formats":Object.keys(data.data_formats).map(key => ({
+           name: key,
+           data_type: data.data_formats[key].data_type,
+           unit: data.data_formats[key].unit
+       }))};
 }
 
  /**
@@ -97,7 +108,7 @@ function formats(){
   * Cette liste sera contenue dans la clé objects
   */
 function objects_serials(){
-    return {"objects":[]};
+     return {"objects": data.objects.map(obj => obj.serial)};
 }
 
 /**
@@ -108,7 +119,8 @@ function objects_serials(){
  * l'objet ayant le serial passé en paramètre.
  */
 function get_object_by_serial(serial){
-    return serial;
+    let obj = data.objects.find(obj => obj.serial === serial);
+    return obj;
 }
 
 /**
@@ -119,7 +131,15 @@ function get_object_by_serial(serial){
  * liste des objets ayant l'opérateur passé en paramètre.
  */
 function get_objects_by_operator(operator){
-    return operator;
+    let objects = data.objects.filter(obj => obj.provisionning.operator === operator);
+
+    if (objects.length === 0) {
+        return undefined;
+    }
+
+    return {
+        "objects": objects
+    };
 }
 
 /**
@@ -130,7 +150,17 @@ function get_objects_by_operator(operator){
  * ayant pour mode de communication celui passé en paramètre.
  */
 function get_types_by_comm(comm){
-    return comm;
+    let types = Object.entries(data.types).filter(([key, value]) => value.communication === comm);
+
+    if (types.length === 0) {
+        return undefined;
+    }
+
+    return {
+        "types": types.map(([key, value]) => ({
+            [key]: value
+        }))
+    };
 }
 
 /**
@@ -140,8 +170,21 @@ function get_types_by_comm(comm){
  * Elle retourne un objet javascript contenant une liste de types
  * ayant pour un format de données celui passé en paramètre.
  */
-function get_types_by_format(format){
-    return format;
+function get_types_by_format(format) {
+    let types = Object.entries(data.types).filter(([key, value]) => value.format === format);
+    console.log('Filtered Types:', types);
+
+    if (types.length === 0) {
+        console.log('No types found, returning undefined.');
+        return undefined;
+    }
+
+    let typesList = types.map(([key, value]) => ({ [key]: value }));
+    console.log('Returning types:', typesList);
+
+    return {
+        "types": typesList
+    };
 }
 
 /**
