@@ -216,30 +216,37 @@ function filter_objects_by_comm(comm){
  * du même type que celui passé en paramètre.
  */
 function filter_objects_by_data_type(data_type){
-    let key = Object.entries(data.data_formats).filter(([key, value]) =>
-        value.data_type === data_type
-    ).map(([key, value]) => key);
-    console.log("Clé de data_type : ", key);
-
-    if(key.length === 0){
-        return undefined;
-    }
-
+    // let key = Object.entries(data.data_formats).filter(([key, value]) =>
+    //     value.data_type === data_type
+    // ).map(([key, value]) => key);
+    // console.log("Clé de data_type : ", key);
+    //
+    // if(key.length === 0){
+    //     return undefined;
+    // }
+    //
     // let typeSens = Object.entries(data.types).filter(([key, value]) =>
     //     key.includes(value.sensors)
     // ).map(([key, value]) => key);
     // console.log("Clé de type : ", typeSens);
+    //
+    // // let typeSens = Object.entries(data.types).filter(([key, value]) =>
+    // //     value.sensors.some(sensor => key.includes(sensor))
+    // // ).map(([key, value]) => key);
+    // // console.log("Clé de type : ", typeSens);
+    //
+    // let objects = data.objects.filter(obj => typeSens.includes(obj.type));
+    //
 
-    let typeSens = Object.entries(data.types).filter(([key, value]) =>
-        value.sensors.some(sensor => key.includes(sensor))
-    ).map(([key, value]) => key);
-    console.log("Clé de type : ", typeSens);
+    const result = JSON.parse(JSON.stringify(data)).objects.map(obj => {
+            obj.sensors = data.types[obj.type].sensors;
+            return obj;
+        }).filter(obj => data.types[obj.type].sensors
+            .map((sensor)=>data.data_formats[sensor].data_type).includes(data_type));
+//}).filter(obj => data.types[obj.type].sensors.find( (dt) => data.data_formats[dt].data_type==data_type));
+//    console.log(result);
 
-    let objects = data.objects.filter(obj => typeSens.includes(obj.type));
-
-    return {
-        "objects": objects
-    };
+    return result.length ? {"objects": result} : undefined;
 }
 
 /**
