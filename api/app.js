@@ -171,21 +171,20 @@ function get_types_by_comm(comm){
  * ayant pour un format de données celui passé en paramètre.
  */
 function get_types_by_format(format) {
-    let types = Object.entries(data.types).filter(([key, value]) => value.format === format);
-    console.log('Filtered Types:', types);
-
-    if (types.length === 0) {
-        console.log('No types found, returning undefined.');
+    if (!data.data_formats[format]) {
         return undefined;
     }
 
-    let typesList = types.map(([key, value]) => ({ [key]: value }));
-    console.log('Returning types:', typesList);
-
+    let types = Object.entries(data.types).filter(([key, value]) =>
+        value.sensors.includes(format)
+    ).map((
+        [key, value]) => value);
+    // console.log("Types : ", types);
     return {
-        "types": typesList
+        "types": types
     };
 }
+
 
 /**
  * Cette fonction est exécutée lorsqu'on demande l'adresse
@@ -195,7 +194,17 @@ function get_types_by_format(format) {
  * ayant pour mode de communication celui passé en paramètre.
  */
 function filter_objects_by_comm(comm){
-    return comm;
+    if(!data.communication.includes(comm)){
+        return undefined;
+    }
+
+    let typeComm = Object.entries(data.types).filter(([key, value]) =>
+        value.communication === comm
+    ).map(([key, value]) => key);
+
+    let objects = data.objects.filter(obj => typeComm.includes(obj.type));
+
+    return {"objects":objects};
 }
 
 /**
@@ -207,7 +216,30 @@ function filter_objects_by_comm(comm){
  * du même type que celui passé en paramètre.
  */
 function filter_objects_by_data_type(data_type){
-    return data_type;
+    let key = Object.entries(data.data_formats).filter(([key, value]) =>
+        value.data_type === data_type
+    ).map(([key, value]) => key);
+    console.log("Clé de data_type : ", key);
+
+    if(key.length === 0){
+        return undefined;
+    }
+
+    // let typeSens = Object.entries(data.types).filter(([key, value]) =>
+    //     key.includes(value.sensors)
+    // ).map(([key, value]) => key);
+    // console.log("Clé de type : ", typeSens);
+
+    let typeSens = Object.entries(data.types).filter(([key, value]) =>
+        value.sensors.some(sensor => key.includes(sensor))
+    ).map(([key, value]) => key);
+    console.log("Clé de type : ", typeSens);
+
+    let objects = data.objects.filter(obj => typeSens.includes(obj.type));
+
+    return {
+        "objects": objects
+    };
 }
 
 /**
